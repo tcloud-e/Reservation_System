@@ -1,0 +1,147 @@
+<!-- admin/dashboard.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>教室予約</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f7f6;
+            margin: 0;
+        }
+
+        .calendar-container {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .day-name {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9rem;
+            padding-bottom: 8px;
+        }
+
+        /* 土日の色分け */
+        .day-name:nth-child(7), .calendar-day:nth-child(7n) {
+            color: #3a86ff; /* 土曜は青 */
+        }
+        .day-name:nth-child(1), .calendar-day:nth-child(7n+1) {
+            color: #ff006e; /* 日曜は赤 */
+        }
+
+        .calendar-day {
+            padding: 10px 0;
+            font-size: 1rem;
+            color: #333;
+            border-radius: 8px;
+        }
+
+        /* 今日の日付のハイライト */
+        .calendar-day.today {
+            background-color: #3a86ff;
+            color: #fff !important;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(58, 134, 255, 0.4);
+        }
+
+        .empty {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-header" id="calendarTitle"></div>
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="day-name">日</div>
+            <div class="day-name">月</div>
+            <div class="day-name">火</div>
+            <div class="day-name">水</div>
+            <div class="day-name">木</div>
+            <div class="day-name">金</div>
+            <div class="day-name">土</div>
+        </div>
+    </div>
+
+    <script>
+        function generateCalendar() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth(); 
+            const currentDate = today.getDate();
+
+            const title = document.getElementById('calendarTitle');
+            title.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+            const grid = document.getElementById('calendarGrid');
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); 
+            const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate(); 
+
+            // 1日より前の空白
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('calendar-day', 'empty');
+                grid.appendChild(emptyCell);
+            }
+
+            // 日付を生成
+            for (let date = 1; date <= lastDate; date++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('calendar-day');
+                dayCell.textContent = date;
+
+                if (date === currentDate) {
+                    dayCell.classList.add('today');
+                }
+
+                // --- 💡 クリックイベントの追加 ---
+                dayCell.addEventListener('click', () => {
+                    // 月と日を常に2桁（01, 02...）の形式にする設定
+                    const formattedMonth = String(currentMonth + 1).padStart(2, '0');
+                    const formattedDay = String(date).padStart(2, '0');
+                    
+                    // 送信用の日付データ (例: "2026-06-30")
+                    const targetDate = `${currentYear}-${formattedMonth}-${formattedDay}`;
+                    
+                    // 遷移先のURL（ここでは例として 'detail.html' に設定）
+                    // 実際にある遷移先ファイル名やURLに書き換えてください
+                    const destinationUrl = `ClassRserveRoom.html?date=${targetDate}`;
+                    
+                    // 画面を遷移させる
+                    window.location.href = destinationUrl;
+                });
+                // ---------------------------------
+
+                grid.appendChild(dayCell);
+            }
+        }
+
+        generateCalendar();
+    </script>
+</body>
+</html>
