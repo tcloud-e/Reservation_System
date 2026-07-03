@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>授業予約</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h3>教室を予約して授業を作成（講師）</h3>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/teacher/reservations}" method="post" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">教室</label>
+            <select class="form-select" name="classroomId" required>
+                <option value="" disabled selected>選択してください</option>
+                <option th:each="c : ${classrooms}" th:value="${c.id}"
+                        th:text="${c.name} + '（定員' + ${c.capacity} + '）'"></option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">授業名</label>
+            <input type="text" class="form-control" name="subject" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">日付</label>
+            <input type="date" class="form-control" name="date" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">開始時刻</label>
+            <input type="time" class="form-control" name="startTime" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">終了時刻</label>
+            <input type="time" class="form-control" name="endTime" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">受講可能人数</label>
+            <input type="number" class="form-control" name="capacity" required min="1">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">予約する</button>
+            <a href="/teacher/reservations" class="btn btn-secondary">予約一覧へ</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
