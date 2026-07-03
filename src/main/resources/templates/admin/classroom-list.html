@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>教室管理</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>教室管理（管理者）</h3>
+        <form th:action="@{/logout}" method="post"><button class="btn btn-outline-secondary">ログアウト</button></form>
+    </div>
+
+    <form th:action="@{/admin/classrooms}" method="post" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="name" placeholder="教室名（例：301教室）" required>
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control" name="capacity" placeholder="定員" min="1">
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="location" placeholder="場所（例：3階）">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">追加</button>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+        <tr><th>教室名</th><th>定員</th><th>場所</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${classrooms}">
+            <td th:text="${c.name}"></td>
+            <td th:text="${c.capacity}"></td>
+            <td th:text="${c.location}"></td>
+            <td>
+                <form th:action="@{/admin/classrooms/{id}/delete(id=${c.id})}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-danger">削除</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${classrooms.isEmpty()}">
+            <td colspan="4" class="text-center text-muted">登録された教室がありません</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
