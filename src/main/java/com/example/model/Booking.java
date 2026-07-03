@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bookings", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"reservation_id", "student_id"})
-})
+@Table(name = "bookings")  // uniqueConstraintsを削除
 public class Booking {
 
     @Id
