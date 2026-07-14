@@ -11,11 +11,11 @@ public class Classroom {
     private Long id;
 
     @Column(nullable = false)
-    private String name; // 例: 「301教室」
+    private String name;
 
-    private Integer capacity; // 定員
+    private Integer capacity;
 
-    private String location; // 場所(任意)
+    private String location;
 
     public Classroom() {}
 

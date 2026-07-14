@@ -23,10 +23,13 @@ public class Reservation {
     private User teacher;
 
     @Column(nullable = false)
-    private String subject; // 授業名
+    private String subject; // 時間割から自動セット
 
     @Column(nullable = false)
     private LocalDate date;
+
+    @Column(nullable = false)
+    private int period; // コマ数（1〜4）
 
     @Column(nullable = false)
     private LocalTime startTime;
@@ -34,7 +37,7 @@ public class Reservation {
     @Column(nullable = false)
     private LocalTime endTime;
 
-    private Integer capacity; // 受講可能人数
+    private Integer capacity;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
@@ -51,6 +54,8 @@ public class Reservation {
     public void setSubject(String subject) { this.subject = subject; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
+    public int getPeriod() { return period; }
+    public void setPeriod(int period) { this.period = period; }
     public LocalTime getStartTime() { return startTime; }
     public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
     public LocalTime getEndTime() { return endTime; }

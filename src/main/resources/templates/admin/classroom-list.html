@@ -6,38 +6,56 @@
     <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>教室管理（管理者）</h3>
-        <form th:action="@{/logout}" method="post"><button class="btn btn-outline-secondary">ログアウト</button></form>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>🏫 教室管理（管理者）</h3>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-secondary">ログアウト</button>
+        </form>
     </div>
 
-    <form th:action="@{/admin/classrooms}" method="post" class="row g-2 mb-4">
-        <div class="col-md-4">
-            <input type="text" class="form-control" name="name" placeholder="教室名（例：301教室）" required>
-        </div>
-        <div class="col-md-3">
-            <input type="number" class="form-control" name="capacity" placeholder="定員" min="1">
-        </div>
-        <div class="col-md-3">
-            <input type="text" class="form-control" name="location" placeholder="場所（例：3階）">
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">追加</button>
-        </div>
-    </form>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-light">
-        <tr><th>教室名</th><th>定員</th><th>場所</th><th></th></tr>
+    <!-- 教室追加フォーム -->
+    <div class="card mb-4">
+        <div class="card-header bg-light fw-bold">教室を追加</div>
+        <div class="card-body">
+            <form th:action="@{/admin/classrooms}" method="post" class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="name"
+                           placeholder="教室名（例：404教室）" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="capacity"
+                           placeholder="定員" min="1">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="location"
+                           placeholder="場所（例：4F）">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">追加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 教室一覧 -->
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th>教室名</th><th>場所</th><th>定員</th><th>操作</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="c : ${classrooms}">
             <td th:text="${c.name}"></td>
-            <td th:text="${c.capacity}"></td>
             <td th:text="${c.location}"></td>
+            <td th:text="${c.capacity} + '人'"></td>
             <td>
-                <form th:action="@{/admin/classrooms/{id}/delete(id=${c.id})}" method="post" class="m-0">
+                <form th:action="@{/admin/classrooms/{id}/delete(id=${c.id})}"
+                      method="post" class="m-0"
+                      onsubmit="return confirm('削除しますか？\n生徒が予約中の場合は削除できません。')">
                     <button type="submit" class="btn btn-sm btn-danger">削除</button>
                 </form>
             </td>

@@ -4,10 +4,10 @@ import com.example.model.*;
 import com.example.repository.BookingRepository;
 import com.example.repository.ClassroomRepository;
 import com.example.repository.ReservationRepository;
+import com.example.util.TimetableUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -22,35 +22,36 @@ public class ReservationService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    /** 講師が教室を予約して授業枠を作成 */
-    public Reservation createReservation(User teacher, Long classroomId, String subject,
-                                          LocalDate date, LocalTime startTime, LocalTime endTime,
-                                          Integer capacity) {
+    /** 講師がコマ数を指定して教室を予約 */
+    public Reservation createReservation(User teacher, Long classroomId,
+                                          LocalDate date, int period, Integer capacity) {
 
-        if (!startTime.isBefore(endTime)) {
-            throw new IllegalArgumentException("終了時刻は開始時刻より後にしてください");
-        }
+        var dayOfWeek = date.getDayOfWeek();
+        var periodInfo = TimetableUtil.getPeriod(dayOfWeek, period)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "指定した日付（" + TimetableUtil.dayLabel(dayOfWeek) + "）に"
+                    + period + "コマ目はありません"));
 
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new IllegalArgumentException("教室が見つかりません"));
 
-        // 同一教室・同一日付の予約と時間重複チェック
+        // 同一教室・同一日・同一コマの重複チェック
         List<Reservation> existing = reservationRepository.findByClassroomIdAndDate(classroomId, date);
         for (Reservation r : existing) {
-            boolean overlap = startTime.isBefore(r.getEndTime()) && endTime.isAfter(r.getStartTime());
-            if (overlap) {
+            if (r.getPeriod() == period) {
                 throw new IllegalArgumentException(
-                    "この教室は同じ時間帯に既に予約されています（" + r.getStartTime() + "〜" + r.getEndTime() + "）");
+                    classroom.getName() + " の " + period + "コマ目は既に予約されています");
             }
         }
 
         Reservation reservation = new Reservation();
         reservation.setClassroom(classroom);
         reservation.setTeacher(teacher);
-        reservation.setSubject(subject);
+        reservation.setSubject(periodInfo.subject());
         reservation.setDate(date);
-        reservation.setStartTime(startTime);
-        reservation.setEndTime(endTime);
+        reservation.setPeriod(period);
+        reservation.setStartTime(periodInfo.startTime());
+        reservation.setEndTime(periodInfo.endTime());
         reservation.setCapacity(capacity);
 
         return reservationRepository.save(reservation);
@@ -82,21 +83,14 @@ public class ReservationService {
         bookingRepository.findByReservationAndStudent(reservation, student).ifPresent(b -> {
             throw new IllegalArgumentException("既にこの授業を予約済みです");
         });
-
         long count = bookingRepository.countByReservation(reservation);
         if (reservation.getCapacity() != null && count >= reservation.getCapacity()) {
             throw new IllegalArgumentException("定員に達しています");
         }
-
-        Booking booking = new Booking(reservation, student);
-        bookingRepository.save(booking);
+        bookingRepository.save(new Booking(reservation, student));
     }
 
     public List<Booking> findBookingsByStudent(User student) {
         return bookingRepository.findByStudent(student);
-    }
-
-    public long countBookings(Reservation reservation) {
-        return bookingRepository.countByReservation(reservation);
     }
 }

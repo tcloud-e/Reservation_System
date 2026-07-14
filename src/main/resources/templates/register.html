@@ -5,20 +5,18 @@
     <title>ユーザ登録</title>
     <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
-                        ユーザ登録
-                        (<span th:switch="${role}">
+                        ユーザ登録（<span th:switch="${role}">
                             <span th:case="'admin'">管理者</span>
                             <span th:case="'teacher'">講師</span>
                             <span th:case="'student'">生徒</span>
-                            <span th:case="*">一般</span>
-                        </span>)
+                        </span>）
                     </h4>
                 </div>
                 <div class="card-body">
@@ -30,22 +28,25 @@
 
                         <div class="mb-3">
                             <label class="form-label">ユーザー名（ログインID）</label>
-                            <input type="text" class="form-control" name="username" required>
+                            <input type="text" class="form-control" name="username" required autofocus>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">氏名</label>
                             <input type="text" class="form-control" name="fullName" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">パスワード</label>
-                            <input type="password" class="form-control" name="password" required minlength="8">
+                            <label class="form-label">パスワード（8文字以上）</label>
+                            <input type="password" class="form-control" name="password"
+                                   required minlength="8">
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">登録</button>
+                        <button type="submit" class="btn btn-primary w-100">登録する</button>
                     </form>
 
                     <hr>
-                    <p class="text-center"><a href="/login">ログイン画面へ戻る</a></p>
+                    <p class="text-center mb-0">
+                        <a href="/login">ログイン画面へ戻る</a>
+                    </p>
                 </div>
             </div>
         </div>

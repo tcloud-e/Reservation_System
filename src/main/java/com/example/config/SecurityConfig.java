@@ -19,7 +19,7 @@ public class SecurityConfig {
     private UserService userService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder; // PasswordEncoderConfigから注入
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
