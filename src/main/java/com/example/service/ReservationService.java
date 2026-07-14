@@ -5,7 +5,6 @@ import com.example.repository.BookingRepository;
 import com.example.repository.ClassroomRepository;
 import com.example.repository.ReservationRepository;
 import com.example.util.TimetableUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,14 +12,15 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
+    private final ClassroomRepository classroomRepository;
+    private final BookingRepository bookingRepository;
 
-    @Autowired
-    private ClassroomRepository classroomRepository;
-
-    @Autowired
-    private BookingRepository bookingRepository;
+    public ReservationService(ReservationRepository reservationRepository, ClassroomRepository classroomRepository, BookingRepository bookingRepository ) {
+        this.reservationRepository = reservationRepository;
+        this.classroomRepository = classroomRepository;
+        this.bookingRepository = bookingRepository;
+    }
 
     /** 講師がコマ数を指定して教室を予約 */
     public Reservation createReservation(User teacher, Long classroomId,
