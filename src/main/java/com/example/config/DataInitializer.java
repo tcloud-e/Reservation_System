@@ -2,7 +2,7 @@ package com.example.config;
 
 import com.example.model.Classroom;
 import com.example.repository.ClassroomRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -11,8 +11,11 @@ import java.util.List;
 @Component
 public class DataInitializer implements ApplicationRunner {
 
-    @Autowired
-    private ClassroomRepository classroomRepository;
+    private final ClassroomRepository classroomRepository;
+
+public DataInitializer(ClassroomRepository classroomRepository) {
+    this.classroomRepository = classroomRepository;
+}
 
     @Override
     public void run(ApplicationArguments args) {

@@ -3,18 +3,19 @@ package com.example.service;
 import com.example.model.Classroom;
 import com.example.repository.ClassroomRepository;
 import com.example.repository.ReservationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class ClassroomService {
 
-    @Autowired
-    private ClassroomRepository classroomRepository;
+    private final ClassroomRepository classroomRepository;
+    private final ReservationRepository reservationRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    public ClassroomService(ReservationRepository reservationRepository, ClassroomRepository classroomRepository) {
+        this.reservationRepository = reservationRepository;
+        this.classroomRepository = classroomRepository;
+    }
 
     public List<Classroom> findAll() {
         return classroomRepository.findAll();

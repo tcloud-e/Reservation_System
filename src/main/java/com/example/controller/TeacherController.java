@@ -4,7 +4,6 @@ import com.example.model.User;
 import com.example.service.ClassroomService;
 import com.example.service.ReservationService;
 import com.example.util.TimetableUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,11 +14,15 @@ import java.time.LocalDate;
 @RequestMapping("/teacher")
 public class TeacherController {
 
-    @Autowired
-    private ReservationService reservationService;
+    // TeacherController.java
+private final ReservationService reservationService;
+private final ClassroomService classroomService;
 
-    @Autowired
-    private ClassroomService classroomService;
+public TeacherController(ReservationService reservationService,
+                          ClassroomService classroomService) {
+    this.reservationService = reservationService;
+    this.classroomService = classroomService;
+}
 
     @GetMapping("/reservations/new")
     public String newForm(@RequestParam(required = false) String date, Model model) {

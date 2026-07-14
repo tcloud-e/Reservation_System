@@ -3,7 +3,7 @@ package com.example.controller;
 import com.example.model.Reservation;
 import com.example.model.User;
 import com.example.service.ReservationService;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,8 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/student")
 public class StudentController {
 
-    @Autowired
-    private ReservationService reservationService;
+    // StudentController.java
+    private final ReservationService reservationService;
+
+    public StudentController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
 
     @GetMapping("/reservations")
     public String list(@AuthenticationPrincipal User student, Model model) {
