@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/student")
@@ -24,12 +25,14 @@ public class StudentController {
     }
 
     @PostMapping("/reservations/{id}/book")
-    public String book(@PathVariable Long id, @AuthenticationPrincipal User student, Model model) {
+    public String book(@PathVariable Long id,
+                       @AuthenticationPrincipal User student,
+                       RedirectAttributes ra) {
         try {
             Reservation reservation = reservationService.findById(id);
             reservationService.bookLesson(reservation, student);
         } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/student/reservations";
     }

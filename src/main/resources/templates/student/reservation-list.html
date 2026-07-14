@@ -6,44 +6,71 @@
     <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>受講可能な授業一覧（生徒）</h3>
-        <form th:action="@{/logout}" method="post"><button class="btn btn-outline-secondary">ログアウト</button></form>
+        <h3>📖 受講可能な授業一覧（生徒）</h3>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-secondary">ログアウト</button>
+        </form>
     </div>
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-light">
-        <tr><th>日付</th><th>時間</th><th>教室</th><th>授業名</th><th>講師</th><th>空き</th><th></th></tr>
+    <!-- 授業一覧 -->
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th>日付</th><th>コマ</th><th>時間</th><th>科目</th>
+            <th>教室</th><th>場所</th><th>講師</th><th>空き</th><th>操作</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="r : ${reservations}">
             <td th:text="${r.date}"></td>
+            <td th:text="${r.period} + 'コマ目'"></td>
             <td th:text="${r.startTime} + '〜' + ${r.endTime}"></td>
+            <td><span class="badge bg-primary" th:text="${r.subject}"></span></td>
             <td th:text="${r.classroom.name}"></td>
-            <td th:text="${r.subject}"></td>
+            <td th:text="${r.classroom.location}"></td>
             <td th:text="${r.teacher.fullName}"></td>
-            <td th:text="${r.bookings.size()} + '/' + ${r.capacity}"></td>
             <td>
-                <form th:action="@{/student/reservations/{id}/book(id=${r.id})}" method="post" class="m-0">
-                    <button type="submit" class="btn btn-sm btn-primary">予約</button>
+                <span th:text="${r.capacity - r.bookings.size()} + '/' + ${r.capacity} + '人'"></span>
+            </td>
+            <td>
+                <form th:action="@{/student/reservations/{id}/book(id=${r.id})}"
+                      method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-success"
+                            th:disabled="${r.bookings.size() >= r.capacity}">
+                        予約
+                    </button>
                 </form>
             </td>
         </tr>
         <tr th:if="${reservations.isEmpty()}">
-            <td colspan="7" class="text-center text-muted">現在受講可能な授業はありません</td>
+            <td colspan="9" class="text-center text-muted">現在受講可能な授業はありません</td>
         </tr>
         </tbody>
     </table>
 
-    <h4 class="mt-5">自分の予約済み授業</h4>
-    <ul>
-        <li th:each="b : ${myBookings}"
-            th:text="${b.reservation.date} + ' ' + ${b.reservation.subject} + '（' + ${b.reservation.classroom.name} + '）'"></li>
-        <li th:if="${myBookings.isEmpty()}" class="text-muted">予約済みの授業はありません</li>
-    </ul>
+    <!-- 自分の予約済み一覧 -->
+    <h4 class="mt-5">✅ 自分の予約済み授業</h4>
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+        <tr><th>日付</th><th>コマ</th><th>科目</th><th>教室</th><th>講師</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${myBookings}">
+            <td th:text="${b.reservation.date}"></td>
+            <td th:text="${b.reservation.period} + 'コマ目'"></td>
+            <td><span class="badge bg-primary" th:text="${b.reservation.subject}"></span></td>
+            <td th:text="${b.reservation.classroom.name}"></td>
+            <td th:text="${b.reservation.teacher.fullName}"></td>
+        </tr>
+        <tr th:if="${myBookings.isEmpty()}">
+            <td colspan="5" class="text-center text-muted">予約済みの授業はありません</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 </body>
 </html>

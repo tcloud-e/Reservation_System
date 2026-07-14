@@ -12,6 +12,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByDateGreaterThanEqualOrderByDateAscStartTimeAsc(LocalDate date);
 
-    // 同じ教室・同じ日に時間が重なる予約があるかチェック用
     List<Reservation> findByClassroomIdAndDate(Long classroomId, LocalDate date);
+
+    List<Reservation> findByClassroomId(Long classroomId);
 }

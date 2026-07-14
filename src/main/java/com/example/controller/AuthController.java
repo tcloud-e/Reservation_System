@@ -4,10 +4,7 @@ import com.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AuthController {
@@ -20,10 +17,9 @@ public class AuthController {
         return "login";
     }
 
-    // ロールごとに登録ページを分ける（/register/admin, /register/teacher, /register/student）
     @GetMapping("/register/{role}")
     public String registerForm(@PathVariable String role, Model model) {
-        model.addAttribute("role", role); // admin / teacher / student
+        model.addAttribute("role", role);
         return "register";
     }
 
@@ -42,7 +38,6 @@ public class AuthController {
             model.addAttribute("role", role.replace("ROLE_", "").toLowerCase());
             return "register";
         }
-
         return "redirect:/login?registered";
     }
 }

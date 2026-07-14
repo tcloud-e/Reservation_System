@@ -24,26 +24,19 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("ユーザーが見つかりません: " + username));
     }
 
-    /**
-     * ユーザー登録
-     * @throws IllegalArgumentException ユーザー名重複時、不正なロール指定時
-     */
     public void register(String username, String rawPassword, String fullName, String role) {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("このユーザー名は既に使用されています");
         }
-
         if (!isValidRole(role)) {
             throw new IllegalArgumentException("不正なユーザタイプです");
         }
-
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setFullName(fullName);
         user.setRole(role);
         user.setEnabled(true);
-
         userRepository.save(user);
     }
 

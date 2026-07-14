@@ -3,13 +3,13 @@ package com.example.controller;
 import com.example.model.User;
 import com.example.service.ClassroomService;
 import com.example.service.ReservationService;
+import com.example.util.TimetableUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Controller
 @RequestMapping("/teacher")
@@ -22,8 +22,16 @@ public class TeacherController {
     private ClassroomService classroomService;
 
     @GetMapping("/reservations/new")
-    public String newForm(Model model) {
+    public String newForm(@RequestParam(required = false) String date, Model model) {
         model.addAttribute("classrooms", classroomService.findAll());
+
+        if (date != null && !date.isBlank()) {
+            LocalDate localDate = LocalDate.parse(date);
+            var periods = TimetableUtil.getPeriods(localDate.getDayOfWeek());
+            model.addAttribute("selectedDate", date);
+            model.addAttribute("dayLabel", TimetableUtil.dayLabel(localDate.getDayOfWeek()));
+            model.addAttribute("periods", periods);
+        }
         return "teacher/reservation-form";
     }
 
@@ -31,24 +39,23 @@ public class TeacherController {
     public String create(
             @AuthenticationPrincipal User teacher,
             @RequestParam Long classroomId,
-            @RequestParam String subject,
             @RequestParam String date,
-            @RequestParam String startTime,
-            @RequestParam String endTime,
+            @RequestParam int period,
             @RequestParam Integer capacity,
             Model model) {
 
         try {
             reservationService.createReservation(
-                    teacher, classroomId, subject,
-                    LocalDate.parse(date), LocalTime.parse(startTime), LocalTime.parse(endTime),
-                    capacity);
+                    teacher, classroomId, LocalDate.parse(date), period, capacity);
         } catch (IllegalArgumentException e) {
+            LocalDate localDate = LocalDate.parse(date);
             model.addAttribute("error", e.getMessage());
             model.addAttribute("classrooms", classroomService.findAll());
+            model.addAttribute("selectedDate", date);
+            model.addAttribute("dayLabel", TimetableUtil.dayLabel(localDate.getDayOfWeek()));
+            model.addAttribute("periods", TimetableUtil.getPeriods(localDate.getDayOfWeek()));
             return "teacher/reservation-form";
         }
-
         return "redirect:/teacher/reservations";
     }
 
@@ -59,12 +66,10 @@ public class TeacherController {
     }
 
     @PostMapping("/reservations/{id}/delete")
-    public String delete(@PathVariable Long id, @AuthenticationPrincipal User teacher, Model model) {
+    public String delete(@PathVariable Long id, @AuthenticationPrincipal User teacher) {
         try {
             reservationService.deleteReservation(id, teacher);
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-        }
+        } catch (IllegalArgumentException ignored) {}
         return "redirect:/teacher/reservations";
     }
 }

@@ -6,45 +6,107 @@
     <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container mt-5">
-    <h3>教室を予約して授業を作成（講師）</h3>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>📅 教室予約（講師）</h3>
+        <div>
+            <a href="/teacher/reservations" class="btn btn-outline-primary me-2">予約一覧</a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button class="btn btn-outline-secondary">ログアウト</button>
+            </form>
+        </div>
+    </div>
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <form th:action="@{/teacher/reservations}" method="post" class="row g-3">
-        <div class="col-md-6">
-            <label class="form-label">教室</label>
-            <select class="form-select" name="classroomId" required>
-                <option value="" disabled selected>選択してください</option>
-                <option th:each="c : ${classrooms}" th:value="${c.id}"
-                        th:text="${c.name} + '（定員' + ${c.capacity} + '）'"></option>
-            </select>
+    <!-- ステップ1：日付選択 -->
+    <div class="card mb-4">
+        <div class="card-header fw-bold bg-light">① 日付を選択</div>
+        <div class="card-body">
+            <form method="get" th:action="@{/teacher/reservations/new}" class="row g-2">
+                <div class="col-md-4">
+                    <input type="date" class="form-control" name="date"
+                           th:value="${selectedDate}" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">時間割を確認</button>
+                </div>
+            </form>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">授業名</label>
-            <input type="text" class="form-control" name="subject" required>
+    </div>
+
+    <!-- ステップ2：コマ・教室選択（日付選択後に表示） -->
+    <div th:if="${periods != null and !periods.isEmpty()}">
+
+        <!-- 時間割表示 -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold bg-light">
+                <span th:text="${selectedDate + '（' + dayLabel + '）の時間割'}"></span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                    <tr><th>コマ</th><th>開始</th><th>終了</th><th>科目</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${periods}">
+                        <td th:text="${p.period} + 'コマ目'"></td>
+                        <td th:text="${p.startTime}"></td>
+                        <td th:text="${p.endTime}"></td>
+                        <td><span class="badge bg-primary" th:text="${p.subject}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="col-md-4">
-            <label class="form-label">日付</label>
-            <input type="date" class="form-control" name="date" required>
+
+        <!-- 予約フォーム -->
+        <div class="card">
+            <div class="card-header fw-bold bg-light">② 教室とコマを選んで予約</div>
+            <div class="card-body">
+                <form th:action="@{/teacher/reservations}" method="post" class="row g-3">
+                    <input type="hidden" name="date" th:value="${selectedDate}">
+
+                    <div class="col-md-6">
+                        <label class="form-label">教室</label>
+                        <select class="form-select" name="classroomId" required>
+                            <option value="" disabled selected>選択してください</option>
+                            <option th:each="c : ${classrooms}"
+                                    th:value="${c.id}"
+                                    th:text="${c.name} + '　' + ${c.location} + '　定員' + ${c.capacity} + '人'">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">コマ数</label>
+                        <select class="form-select" name="period" required>
+                            <option value="" disabled selected>選択してください</option>
+                            <option th:each="p : ${periods}"
+                                    th:value="${p.period}"
+                                    th:text="${p.period} + 'コマ目　' + ${p.startTime} + '〜' + ${p.endTime} + '　' + ${p.subject}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">受講可能人数</label>
+                        <input type="number" class="form-control" name="capacity" min="1" required>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">予約する</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="col-md-4">
-            <label class="form-label">開始時刻</label>
-            <input type="time" class="form-control" name="startTime" required>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">終了時刻</label>
-            <input type="time" class="form-control" name="endTime" required>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">受講可能人数</label>
-            <input type="number" class="form-control" name="capacity" required min="1">
-        </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">予約する</button>
-            <a href="/teacher/reservations" class="btn btn-secondary">予約一覧へ</a>
-        </div>
-    </form>
+    </div>
+
+    <!-- 授業なし（休み） -->
+    <div th:if="${selectedDate != null and (periods == null or periods.isEmpty())}"
+         class="alert alert-warning mt-3">
+        ⚠ この日（<span th:text="${dayLabel}"></span>）は授業がありません
+    </div>
 </div>
 </body>
 </html>
