@@ -70,7 +70,7 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("予約が見つかりません"));
     }
 
-    public void deleteReservation(Long id, User teacher) {
+    public void TeacherDeleteReservation(Long id, User teacher) {
         Reservation r = findById(id);
         if (!r.getTeacher().getId().equals(teacher.getId())) {
             throw new IllegalArgumentException("自分が作成した予約のみ削除できます");
@@ -92,5 +92,10 @@ public class ReservationService {
 
     public List<Booking> findBookingsByStudent(User student) {
         return bookingRepository.findByStudent(student);
+    }
+
+    /*予約を削除(生徒)*/
+    public void StudentDeleteLesson(Long id,User student) {
+        Booking b=findById(id);
     }
 }

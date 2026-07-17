@@ -68,7 +68,7 @@ public class TeacherController {
     @PostMapping("/reservations/{id}/delete")
     public String delete(@PathVariable Long id, @AuthenticationPrincipal User teacher) {
         try {
-            reservationService.deleteReservation(id, teacher);
+            reservationService.TeacherDeleteReservation(id, teacher);
         } catch (IllegalArgumentException ignored) {}
         return "redirect:/teacher/reservations";
     }
