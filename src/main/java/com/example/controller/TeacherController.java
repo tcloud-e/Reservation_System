@@ -1,7 +1,9 @@
 package com.example.controller;
 
+import com.example.model.Classroom;
 import com.example.model.User;
 import com.example.service.ClassroomService;
+import com.example.repository.ClassroomRepository;
 import com.example.service.ReservationService;
 import com.example.util.TimetableUtil;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,6 +11,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+
+
 
 @Controller
 @RequestMapping("/teacher")
