@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>時間割</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>
+            📅 <span th:text="${classroom.name}"></span> の時間割
+        </h3>
+        <a href="/teacher/classroom/map" class="btn btn-outline-secondary">← マップへ戻る</a>
+    </div>
+
+    <!-- 日付切替 -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="date" class="form-control" name="date"
+                   th:value="${targetDate}" required>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">表示</button>
+        </div>
+    </form>
+
+    <!-- 教室情報 -->
+    <div class="alert alert-info">
+        <strong th:text="${classroom.name}"></strong>
+        　場所：<span th:text="${classroom.location}"></span>
+        　定員：<span th:text="${classroom.capacity} + ' 人'"></span>
+    </div>
+
+    <!-- 時間割表 -->
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th>コマ</th><th>時間</th><th>科目</th><th>講師</th><th>予約状況</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${reservations}">
+            <td th:text="${r.period} + 'コマ目'"></td>
+            <td th:text="${r.startTime} + '〜' + ${r.endTime}"></td>
+            <td><span class="badge bg-primary" th:text="${r.subject}"></span></td>
+            <td th:text="${r.teacher.fullName}"></td>
+            <td th:text="${r.bookings.size()} + '/' + ${r.capacity} + '人'"></td>
+        </tr>
+        <tr th:if="${reservations.isEmpty()}">
+            <td colspan="5" class="text-center text-muted">
+                この日の予約はありません
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 予約ページへのリンク -->
+    <a th:href="@{/teacher/reservations/new(date=${targetDate})}"
+       class="btn btn-primary">
+        ＋ この日に授業を追加する
+    </a>
+</div>
+</body>
+</html>
