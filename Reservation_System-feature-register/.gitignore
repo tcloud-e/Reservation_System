@@ -1,0 +1,7 @@
+target/
+data/classroom.db
+.idea/
+*.iml
+.vscode/
+.DS_Store
+HELP.md
