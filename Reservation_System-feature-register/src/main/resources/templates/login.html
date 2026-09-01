@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">📚 教室予約システム ログイン</h4>
+                </div>
+                <div class="card-body">
+                    <div th:if="${param.error}" class="alert alert-danger">
+                        ユーザー名またはパスワードが違います
+                    </div>
+                    <div th:if="${param.registered}" class="alert alert-success">
+                        登録が完了しました。ログインしてください
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-info">
+                        ログアウトしました
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">ユーザー名</label>
+                            <input type="text" class="form-control" name="username" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">パスワード</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">ログイン</button>
+                    </form>
+
+                    <hr>
+                     <!-- <div class="d-grid gap-2">
+                        <a href="/register/student" class="btn btn-outline-success">生徒として登録</a>
+                        <a href="/register/teacher" class="btn btn-outline-primary">講師として登録</a>
+                        <a href="/register/admin" class="btn btn-outline-secondary">管理者として登録</a> -->
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
