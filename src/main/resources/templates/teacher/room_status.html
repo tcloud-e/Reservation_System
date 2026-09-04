@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>教室フロアマップ & 予約状況</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; }
+        .main-title { margin-bottom: 25px; border-left: 5px solid #0056b3; padding-left: 15px; }
+        .container { display: flex; gap: 30px; align-items: flex-start; }
+        .map-section { flex: 2; }
+        .detail-section { flex: 1; background: #fff; border: 1px solid #e0e0e0; padding: 25px; border-radius: 8px; min-height: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* フロアごとのコンテナレイアウト */
+        .floor-container { margin-bottom: 25px; border: 1px solid #e0e0e0; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .floor-title { font-size: 1.3em; font-weight: bold; border-bottom: 2px solid #0056b3; padding-bottom: 8px; margin-bottom: 15px; color: #0056b3; }
+        
+        /* 教室カード（4列グリッド配置） */
+        .grid-layout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .classroom-btn {
+            position: relative; padding: 20px 15px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 8px;
+            text-align: center; cursor: pointer; transition: all 0.2s ease;
+        }
+        .classroom-btn:hover { background-color: #e8f0fe; border-color: #4285f4; transform: translateY(-2px); }
+        .classroom-name { font-weight: bold; display: block; font-size: 1.15em; margin-bottom: 5px; color: #212529; }
+        .classroom-capacity { font-size: 0.9em; color: #6c757d; }
+        
+        /* 特別な教室（201大ホール）用のバッジ */
+        .special-tag {
+            position: absolute; top: 5px; right: 5px; background-color: #e8eaed; color: #5f6368;
+            font-size: 0.7em; padding: 2px 6px; border-radius: 4px; font-weight: bold;
+        }
+
+        /* スケジュール表示用スタイル */
+        .schedule-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .schedule-table th, .schedule-table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        .schedule-table th { background-color: #f8f9fa; color: #495057; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
+        .status-free { background-color: #d4edda; color: #155724; }
+        .status-booked { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <!-- 戻るボタンエリアを追加 -->
+    <div style="margin-bottom: 15px;">
+        <a href="/teacher/reservations" style="display: inline-block; padding: 8px 16px; background-color: #6c757d; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#5a6268'" onmouseout="this.style.backgroundColor='#6c757d'">
+        ← 自分の予約一覧に戻る
+    </a>
+    </div>
+
+    <h1 class="main-title">教室予約状況（フロアマップ）</h1>
+    
+    <div style="margin-bottom: 25px;">
+        <label for="search-date" style="font-weight: bold; margin-right: 10px;">表示日選択: </label>
+        <input type="date" id="search-date" th:value="${today}" style="padding: 6px 12px; font-size: 1em; border-radius: 4px; border: 1px solid #ced4da;">
+    </div>
+
+    <div class="container">
+        <!-- 左側：フロアマップエリア（DBの全データをきれいにマッピング） -->
+        <div class="map-section">
+            <div th:each="entry : ${floorMap}" class="floor-container" th:if="${!entry.value.isEmpty()}">
+                <div class="floor-title" th:text="${entry.key} + ' Floor'">1F Floor</div>
+                <div class="grid-layout">
+                    <div th:each="room : ${entry.value}" 
+                         class="classroom-btn" 
+                         th:data-id="${room.id}"
+                         th:data-name="${room.name}"
+                         onclick="fetchSchedule(this)">
+                         
+                        <!-- 大ホールなどの個別補足がある場合の特別バッジ -->
+                        <span th:if="${room.location.contains('大ホール')}" class="special-tag">ホール</span>
+                        
+                        <span class="classroom-name" th:text="${room.name}">101教室</span>
+                        <span class="classroom-capacity" th:text="'定員: ' + ${room.capacity} + '名'">10名</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：選択した教室の予約空き状況 -->
+        <div class="detail-section" id="detail-section">
+            <h3 style="margin-top: 0;">教室を選択してください</h3>
+            <p style="color: #6c757d; line-height: 1.6;">左側のマップから任意の教室をクリックすると、その日の授業時間割と予約（空室）状況がここに表示されます。</p>
+        </div>
+    </div>
+
+    <script>
+        function fetchSchedule(element) {
+            // アクティブなボタンのスタイル切り替え
+            document.querySelectorAll('.classroom-btn').forEach(btn => btn.style.borderColor = '#ced4da');
+            element.style.borderColor = '#4285f4';
+
+            const classroomId = element.getAttribute('data-id');
+            const classroomName = element.getAttribute('data-name');
+            const selectedDate = document.getElementById('search-date').value;
+
+            if (!selectedDate) {
+                alert('日付を選択してください。');
+                return;
+            }
+
+            const detailSection = document.getElementById('detail-section');
+            detailSection.innerHTML = '<p>読み込み中...</p>';
+
+            fetch(`/teacher/api/schedule?classroomId=${classroomId}&date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = `<h3 style="margin-top: 0; color: #0056b3;">${classroomName} の状況</h3>`;
+                    html += `<p style="font-size: 0.95em; color: #495057;">日付: <strong>${data.date} (${data.dayLabel})</strong></p>`;
+                    
+                    if (data.schedule.length === 0) {
+                        html += `<div style="padding: 15px; background-color: #fff3cd; color: #856404; border-radius: 4px;">本日は休校、または授業の設定がありません。</div>`;
+                    } else {
+                        html += `<table class="schedule-table">`;
+                        html += `<thead><tr><th>時限</th><th>時間帯</th><th>通常科目</th><th>状態</th></tr></thead><tbody>`;
+                        
+                        data.schedule.forEach(item => {
+                            const badgeClass = item.booked ? 'status-badge status-booked' : 'status-badge status-free';
+                            html += `
+                                <tr>
+                                    <td style="font-weight: bold;">${item.period}コマ目</td>
+                                    <td style="font-size: 0.9em; color: #495057;">${item.timeLabel}</td>
+                                    <td>${item.subject}</td>
+                                    <td><span class="${badgeClass}">${item.status}</span></td>
+                                </tr>
+                            `;
+                        });
+                        html += `</tbody></table>`;
+                    }
+                    detailSection.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    detailSection.innerHTML = '<p style="color: red;">予約状況の取得中にエラーが発生しました。</p>';
+                });
+        }
+    </script>
+</body>
+</html>
